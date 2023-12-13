@@ -4,8 +4,8 @@ export const tables = () => ({
 	plugins: {
 		table_name: "plugins",
 	},
-	installRequests: {
-		table_name: "install_requests",
+	installationRequests: {
+		table_name: "installation_requests",
 	},
 });
 
@@ -51,7 +51,7 @@ export const onInstall = () => {
 				},
 				{
 					statement: `CREATE TABLE ${
-						tables().installRequests.table_name
+						tables().installationRequests.table_name
 					} (
 						id UUID PRIMARY KEY,
 						manifest_uri VARCHAR(255),
@@ -155,9 +155,205 @@ export const endpoints = {
 				},
 			},
 		},
+		"/install": {
+			post: {
+				summary: "Install a plugin",
+				operationId: "installPlugin",
+				execution: async (ctx) => {
+					const { req, res, installPlugin } = ctx;
+					const { isRootUser } = res.locals;
+					if (!isRootUser) {
+						return {
+							status: 401,
+							data: null,
+						};
+					}
+					const uri = req.body?.manifest_uri;
+					if (uri) {
+						await installPlugin(uri, { rebuildAfterSuccess: true });
+					}
+					return {
+						status: 200,
+						data: null,
+					};
+				},
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								properties: {
+									manifest_uri: {
+										type: "string",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/installation-requests": {
+			post: {
+				summary: "Request a plugin be installed",
+				operationId: "requestPluginInstallation",
+				privacy: "PUBLIC",
+				execution: async (ctx) => {
+					const { req, plugins } = ctx;
+					const { manifest_uri } = req.body;
+					const requestedByUri = req.get("host");
+					const manifestRes = await fetch(manifest_uri);
+					if (!manifestRes.ok) {
+						return {
+							status: 500,
+							data: null,
+							message: "Manifest JSON could not be fetched",
+						};
+					}
+					const manifest = await manifestRes.json();
+
+					// Example of an optional dependency
+					if (plugins["deco-notifications"]) {
+						await plugins[
+							"deco-notifications"
+						].operations.createNotification({
+							...ctx,
+							req: {
+								...ctx.req,
+								body: {
+									plugin_id: plugins._currentPlugin.id,
+									message: `${requestedByUri} wants to installation ${manifest.name} from ${manifest_uri}`,
+								},
+							},
+						});
+					}
+
+					return [
+						() => {
+							return [
+								{
+									statement: `INSERT INTO ${
+										tables().installationRequests.table_name
+									} (id, manifest_uri, requested_by_uri) VALUES (gen_random_uuid(), $1, $2)`,
+									data_key: "installationRequest",
+									values: [manifest_uri, requestedByUri],
+								},
+							];
+						},
+					];
+				},
+			},
+			get: {
+				summary: "Fetch installation requests",
+				operationId: "fetchInstallationRequests",
+				execution: () => {
+					return [
+						() => {
+							return [
+								{
+									statement: `SELECT * FROM ${
+										tables().installationRequests.table_name
+									} ORDER BY created_at DESC LIMIT 50;`,
+									data_key: "installationRequests",
+									values: [],
+								},
+							];
+						},
+					];
+				},
+				handleReturn: ({ memory }) => {
+					const { installationRequests } = memory;
+					return {
+						status: 200,
+						data: installationRequests?.rows,
+					};
+				},
+			},
+		},
+		"/installation-requests/{id}": {
+			delete: {
+				summary: "Delete an installation request",
+				operationId: "deleteInstallationRequest",
+				execution: async ({ req }) => {
+					const { id } = req.params;
+					return [
+						() => {
+							return [
+								{
+									statement: `DELETE FROM ${
+										tables().installationRequests.table_name
+									} WHERE id = $1`,
+									data_key: "installationRequest",
+									values: [id],
+								},
+							];
+						},
+					];
+				},
+			},
+			get: {
+				summary: "Fetch an installation request",
+				operationId: "fetchInstallationRequest",
+				execution: async ({ req }) => {
+					const { id } = req.params;
+					return [
+						() => {
+							return [
+								{
+									statement: `SELECT * FROM ${
+										tables().installationRequests.table_name
+									} WHERE id = $1`,
+									data_key: "installationRequest",
+									values: [id],
+								},
+							];
+						},
+					];
+				},
+			},
+		},
+		"/installation-requests/{id}/accept": {
+			post: {
+				summary: "Accept an installation request",
+				operationId: "acceptInstallationRequest",
+				execution: async (ctx) => {
+					// Special property passed to the "plugins" plugin
+					const { installPlugin, runRoute } = ctx;
+
+					// Fetch the request
+					const { installationRequest } = await runRoute(
+						ctx,
+						endpoints.paths["/installation-requests/{id}"].get
+					);
+					const manifestUri =
+						installationRequest.rows[0]?.manifest_uri;
+					try {
+						await installPlugin(manifestUri, {
+							rebuildAfterSuccess: true,
+						});
+						// Delete the request
+						await runRoute(
+							ctx,
+							endpoints.paths["/installation-requests/{id}"]
+								.delete
+						);
+						return {
+							status: 200,
+							data: null,
+						};
+					} catch (err) {
+						return {
+							status: 500,
+							data: null,
+						};
+					}
+				},
+			},
+		},
 		"/{id}": {
 			delete: {
-				summary: "Delete an plugin installation record",
+				summary: "Delete a plugin installation record",
 				operationId: "deleteInstallationRecord",
 				execution: ({ req }) => {
 					const { id } = req.params;
@@ -294,79 +490,6 @@ export const endpoints = {
 				},
 			},
 		},
-		"/install-requests": {
-			post: {
-				summary: "Request a plugin be installed",
-				operationId: "requestPluginInstall",
-				privacy: "PUBLIC",
-				execution: async (ctx) => {
-					const { req, plugins } = ctx;
-					const { manifest_uri } = req.body;
-					const requestedByUri = req.get("host");
-					const manifestRes = await fetch(manifest_uri);
-					if (!manifestRes.ok) {
-						return {
-							status: 500,
-							data: null,
-							message: "Manifest JSON could not be fetched",
-						};
-					}
-					const manifest = await manifestRes.json();
-
-					// Example of an optional dependency
-					if (plugins["deco-notifications"]) {
-						await plugins[
-							"deco-notifications"
-						].operations.createNotification({
-							...ctx,
-							req: {
-								...ctx.req,
-								body: {
-									plugin_id: plugins._currentPlugin.id,
-									message: `${requestedByUri} wants to install ${manifest.name} from ${manifest_uri}`,
-								},
-							},
-						});
-					}
-
-					return [
-						() => {
-							return [
-								{
-									statement: `INSERT INTO ${
-										tables().installRequests.table_name
-									} (id, manifest_uri, requested_by_uri) VALUES (gen_random_uuid(), $1, $2)`,
-									data_key: "installRequest",
-									values: [manifest_uri, requestedByUri],
-								},
-							];
-						},
-					];
-				},
-			},
-		},
-		"/install-requests/{id}": {
-			delete: {
-				summary: "Delete an installation request",
-				operationId: "deleteInstallRequest",
-				execution: async ({ req }) => {
-					const { id } = req.params;
-					return [
-						() => {
-							return [
-								{
-									statement: `DELETE FROM ${
-										tables().installRequests.table_name
-									} WHERE id = $1`,
-									data_key: "installRequest",
-									values: [id],
-								},
-							];
-						},
-					];
-				},
-			},
-		},
 	},
 	components: {
 		schemas: {
@@ -431,19 +554,19 @@ export const endpoints = {
 					"installed_at",
 				],
 			},
-			InstallRequest: {
+			InstallationRequest: {
 				type: "object",
 				properties: {
 					id: {
 						type: "string",
 						format: "uuid",
 						description:
-							"The unique identifier for the install request.",
+							"The unique identifier for the installation request.",
 					},
 					manifest_uri: {
 						type: "string",
 						description:
-							"The URI of the manifest associated with the install request.",
+							"The URI of the manifest associated with the installation request.",
 					},
 					requested_by_uri: {
 						type: "string",
@@ -454,7 +577,7 @@ export const endpoints = {
 						type: "string",
 						format: "date-time",
 						description:
-							"The timestamp when the install request was created.",
+							"The timestamp when the installation request was created.",
 						default: "CURRENT_TIMESTAMP",
 					},
 				},

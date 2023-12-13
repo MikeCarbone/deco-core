@@ -44,6 +44,16 @@ export const endpoints = {
 				operationId: "createUser",
 				execution: async ({ req, res }) => {
 					const { password, subdomain } = req.body;
+					const { isRootUser, isServer, _user } = res.locals;
+
+					// Only the root user can create a new user
+					// the _user.id check ensures that this is coming from a login method of auth
+
+					if (!isServer) {
+						if (!isRootUser && !_user?.id) {
+							return { status: 401, data: null };
+						}
+					}
 
 					if (password.length < 15) {
 						return res.status(400).send({

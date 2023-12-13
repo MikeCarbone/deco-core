@@ -78,14 +78,21 @@ export const endpoints = {
 									statement: `SELECT * FROM permissions WHERE resource = $1 AND method = $2 AND domain = $3;`,
 									data_key: "permissions",
 									values: [
-										resource.toUpperCase(),
-										method.toUpperCase(),
-										domain.toUpperCase(),
+										resource?.toUpperCase(),
+										method?.toUpperCase(),
+										domain?.toUpperCase(),
 									],
 								},
 							];
 						},
 					];
+				},
+				handleReturn: ({ memory }) => {
+					const { permissions } = memory;
+					return {
+						status: 200,
+						data: permissions?.rows,
+					};
 				},
 			},
 		},
