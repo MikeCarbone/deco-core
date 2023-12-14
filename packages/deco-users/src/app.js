@@ -98,7 +98,11 @@ export const endpoints = {
 			get: {
 				summary: "Fetch all server users",
 				operationId: "fetchUsers",
-				execution: () => {
+				execution: ({ res }) => {
+					const { isRootUser } = res.locals;
+					if (!isRootUser) {
+						return { status: 401 };
+					}
 					return [
 						() => {
 							return [
@@ -118,7 +122,7 @@ export const endpoints = {
 				summary: "Login a user",
 				operationId: "loginUser",
 				privacy: "PUBLIC",
-				execution: async ({ req, res, secrets }) => {
+				execution: async ({ req, res }) => {
 					const { salt, hash, id } = res.locals?._user;
 					const isCorrectPassword = verifyPassword(
 						req.body?.password,
