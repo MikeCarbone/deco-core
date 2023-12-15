@@ -45,7 +45,12 @@ async function createPluginStructure() {
 				packageFolder,
 				version
 			);
-			await fs.mkdir(versionFolder);
+			try {
+				await fs.access(versionFolder);
+				continue;
+			} catch (_err) {
+				await fs.mkdir(versionFolder);
+			}
 
 			// Copy app.js and manifest.json into the version name folder
 			const sourcePath = path.join(packagePath, "dist");
