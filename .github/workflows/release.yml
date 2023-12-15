@@ -24,10 +24,13 @@ jobs:
               run: npm ci
 
             - name: Build
+              run: npx turbo deploy
+
+            - name: Push Changes
+              continue-on-error: true
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               run: |
-                  npx turbo deploy
                   git config --global user.email "mikecarbone@users.noreply.github.com"
                   git config --global user.name "CI"
                   git add apps/server/public
