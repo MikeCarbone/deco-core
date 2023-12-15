@@ -7,7 +7,7 @@
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "nodemon index.js",
-		"start": "npm run deploy && node index.js",
+		"start": "node index.js",
 		"deploy": "node ./deploy.js"
 	},
 	"author": "Mike Carbone",

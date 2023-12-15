@@ -42,3 +42,11 @@ Learn more about the power of Turborepo:
 -   [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
 -   [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
 -   [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)
+
+## Deployment
+
+We need to figure out a solution to deploy these packages upon push to a repo. I need the scripts available via URL. We may want to do other things to these like track downloads. For now let's just get it live.
+
+-   `server/public`` isnt touched in the repo
+-   When code is merged into main, then we use GH Action to build those files into main, make new commit into the repo
+-   Deployment just has to load the repo, build and run from root directory
