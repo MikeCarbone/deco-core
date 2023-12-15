@@ -8,7 +8,7 @@
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"dev": "nodemon index.js",
 		"start": "node index.js",
-		"deploy": "node ./deploy.js && npm run start"
+		"deploy": "node ./deploy.js"
 	},
 	"author": "Mike Carbone",
 	"license": "MIT",
