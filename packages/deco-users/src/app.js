@@ -156,7 +156,7 @@ export const endpoints = {
 							httpOnly: true,
 							sameSite: "Lax",
 							path: "/",
-							secure: process.env.MODE === "dev" ? false : true,
+							secure: true,
 							maxAge: 60 * 60 * 24 * 7 * 52, // 1 year
 						})
 					);
