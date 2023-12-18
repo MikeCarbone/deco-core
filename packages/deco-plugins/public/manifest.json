@@ -1,6 +1,6 @@
 {
 	"name": "deco-plugins",
-	"version": "0.1",
+	"version": "1.0.0",
 	"manifest_uri": "https://registry.decojs.com/plugins/deco-plugins/latest/manifest.json",
 	"package_uri": "https://registry.decojs.com/plugins/deco-plugins/latest/app.js",
 	"publisher": "https://carbonemike.com/webid",
