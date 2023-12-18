@@ -35,4 +35,4 @@ jobs:
                   git config --global user.name "CI"
                   git add apps/server/public
                   git commit -m "AUTOMATED: Adds builds to apps/server/public"
-                  git push
+                  git push -f
