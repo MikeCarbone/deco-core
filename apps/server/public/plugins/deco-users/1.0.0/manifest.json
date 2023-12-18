@@ -1,0 +1,23 @@
+{
+	"name": "deco-users",
+	"version": "1.0.0",
+	"manifest_uri": "https://registry.decojs.com/plugins/deco-users/latest/manifest.json",
+	"package_uri": "https://registry.decojs.com/plugins/deco-users/latest/app.js",
+	"publisher": "https://carbonemike.com/webid",
+	"protocol": "deco",
+	"images": {
+		"cover": "",
+		"logo": ""
+	},
+	"meta_access": [],
+	"depends_on": [],
+	"options": {},
+	"options_uri": "https://carbonemike.com/to-do-options.json",
+	"past_versions": [
+		{
+			"version": "",
+			"manifest_uri": "http://"
+		}
+	],
+	"new_versions": []
+}
