@@ -23,8 +23,8 @@ jobs:
             - name: Install Dependencies
               run: npm ci
 
-            - name: Build
-              run: npx turbo deploy
+            - name: Build and Deploy Packages
+              run: npm run deploy
 
             - name: Push Changes
               continue-on-error: true

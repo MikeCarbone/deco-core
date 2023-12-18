@@ -24,7 +24,7 @@ async function createPluginStructure() {
 			// Only target plugin names
 			if (!packageFolder.startsWith("deco-")) continue;
 
-			console.log("Pulling in latest versions of ", packageFolder);
+			console.log("Pulling in latest versions of", packageFolder);
 
 			const packagePath = path.join(packagesFolder, packageFolder);
 
@@ -47,7 +47,6 @@ async function createPluginStructure() {
 			);
 			try {
 				await fs.access(versionFolder);
-				continue;
 			} catch (_err) {
 				await fs.mkdir(versionFolder);
 			}
@@ -83,13 +82,13 @@ async function existsInPlugins(folderName) {
 
 // Get version number within package.json
 async function getVersion(packagePath) {
-	const packageJsonPath = path.join(packagePath, "package.json");
+	const manifestPath = path.join(packagePath, "public", "manifest.json");
 	try {
-		const packageJson = await fs.readFile(packageJsonPath, "utf8");
-		const { version } = JSON.parse(packageJson);
+		const manifest = await fs.readFile(manifestPath, "utf8");
+		const { version } = JSON.parse(manifest);
 		return version;
 	} catch (error) {
-		throw new Error(`Failed to read version from ${packageJsonPath}`);
+		throw new Error(`Failed to read version from ${manifestPath}`);
 	}
 }
 

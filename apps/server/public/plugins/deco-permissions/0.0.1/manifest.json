@@ -1,8 +1,8 @@
 {
 	"name": "deco-permissions",
 	"version": "0.1",
-	"manifest_uri": "http://localhost:4321/manifest.json",
-	"package_uri": "./app.js",
+	"manifest_uri": "https://registry.decojs.com/plugins/deco-permissions/latest/manifest.json",
+	"package_uri": "https://registry.decojs.com/plugins/deco-permissions/latest/app.js",
 	"publisher": "https://carbonemike.com/webid",
 	"protocol": "deco",
 	"images": {

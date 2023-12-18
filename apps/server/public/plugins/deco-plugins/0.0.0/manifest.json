@@ -1,8 +1,8 @@
 {
 	"name": "deco-plugins",
 	"version": "0.1",
-	"manifest_uri": "http://localhost:4321/manifest.json",
-	"package_uri": "./app.js",
+	"manifest_uri": "https://registry.decojs.com/plugins/deco-plugins/latest/manifest.json",
+	"package_uri": "https://registry.decojs.com/plugins/deco-plugins/latest/app.js",
 	"publisher": "https://carbonemike.com/webid",
 	"protocol": "deco",
 	"images": {
@@ -12,7 +12,7 @@
 	"meta_access": [],
 	"depends_on": [
 		{
-			"manifest_uri": "../deco-core/packages/deco-notifications/dist/manifest.json",
+			"manifest_uri": "https://registry.decojs.com/plugins/deco-notifications/latest/manifest.json",
 			"is_required": false,
 			"requested_permissions": {
 				"operations": [
