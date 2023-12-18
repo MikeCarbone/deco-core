@@ -16,6 +16,13 @@ const pluginsFolder = path.resolve(__dirname, "./public/plugins/");
 
 async function createPluginStructure() {
 	try {
+		// Create plugins folder if it doesn't exist
+		try {
+			await fs.access(pluginsFolder);
+		} catch (_err) {
+			await fs.mkdir(pluginsFolder, { recursive: true });
+		}
+
 		// Get list of folder names within the ../../packages/ folder
 		const packageFolders = await fs.readdir(packagesFolder);
 
