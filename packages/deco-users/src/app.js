@@ -83,10 +83,10 @@ export const endpoints = {
 				},
 				handleReturn: ({ memory }) => {
 					const { newUser } = memory;
-					if (newUser.rows[0]) {
+					if (newUser?.severity !== "ERROR") {
 						return {
 							status: 200,
-							data: newUser?.rows[0],
+							data: null,
 						};
 					}
 					return {
