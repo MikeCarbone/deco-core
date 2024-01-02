@@ -3503,9 +3503,9 @@ const Vo = {
         },
         handleReturn: ({ memory: o }) => {
           const { newUser: t } = o;
-          return t.rows[0] ? {
+          return t?.severity !== "ERROR" ? {
             status: 200,
-            data: t?.rows[0]
+            data: null
           } : {
             status: 500,
             data: null
