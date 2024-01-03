@@ -81,9 +81,10 @@ export const endpoints = {
 						},
 					];
 				},
-				handleReturn: ({ memory }) => {
+				handleReturn: ({ memory, restartServer }) => {
 					const { newUser } = memory;
 					if (newUser?.severity !== "ERROR") {
+						restartServer();
 						return {
 							status: 200,
 							data: null,
