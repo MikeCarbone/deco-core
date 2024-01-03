@@ -3501,12 +3501,12 @@ const Vo = {
             ]
           ];
         },
-        handleReturn: ({ memory: o }) => {
-          const { newUser: t } = o;
-          return t?.severity !== "ERROR" ? {
+        handleReturn: ({ memory: o, restartServer: t }) => {
+          const { newUser: r } = o;
+          return r?.severity !== "ERROR" ? (t(), {
             status: 200,
             data: null
-          } : {
+          }) : {
             status: 500,
             data: null
           };
